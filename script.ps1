@@ -26,3 +26,32 @@ foreach ($item in $csvData) {
     Write-Host "Resposta da API:"
     Write-Host $response
 }
+
+
+-- Crie uma tabela temporária para armazenar as datas de entrada
+CREATE TABLE #DateInput (StartDate DATE, EndDate DATE);
+
+-- Insira os valores de data de entrada na tabela temporária
+INSERT INTO #DateInput (StartDate, EndDate)
+VALUES 
+    ('2023-01-01', '2023-01-05'),
+    ('2023-02-01', '2023-02-03');
+
+-- Crie uma tabela temporária para armazenar as datas
+CREATE TABLE #DateTable (DateValue DATE);
+
+-- Insira todas as datas entre os intervalos das datas de entrada na tabela temporária
+INSERT INTO #DateTable (DateValue)
+SELECT DATEADD(day, Number, StartDate) AS Date
+FROM #DateInput
+JOIN master.dbo.spt_values ON type = 'P' 
+    AND number BETWEEN 0 AND DATEDIFF(day, StartDate, EndDate)
+ORDER BY Date;
+
+-- Selecione todas as datas da tabela temporária
+SELECT * FROM #DateTable;
+
+-- Limpe as tabelas temporárias
+DROP TABLE #DateInput;
+DROP TABLE #DateTable;
+
